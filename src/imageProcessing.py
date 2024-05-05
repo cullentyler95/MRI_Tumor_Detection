@@ -1,49 +1,36 @@
-import numpy as np
-import random
-from PIL import Image, ImageEnhance
-import cv2
-import os
 import cv2
 import numpy as np
-os.chdir('./src')
-def skull_strip_mri_jpg(image_path):
+import matplotlib.pyplot as plt
+import ants
 
-    # Load the image
-    image = cv2.imread(image_path)
-    
-    # Convert to grayscale
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    # Apply Gaussian blur to smooth the image and reduce noise
-    blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
-    
-    # Apply thresholding to create a mask, adjusting the threshold value as needed
-    _, mask = cv2.threshold(blurred_image, 50, 255, cv2.THRESH_BINARY)
-    
-    # Improve mask with morphological operations
-    kernel = np.ones((5,5), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
-    # Apply the mask to the original image
-    skull_stripped_image = cv2.bitwise_and(image, image, mask=mask)
-    
-    return skull_stripped_image, mask
+from antspynet.utilities import brain_extraction
 
-# Example usage
-skull_stripped_image, mask = skull_strip_mri_jpg('./data/Testing/notumor/Te-no_0368.jpg')
-cv2.imshow("Skull Stripped Image", skull_stripped_image)
-cv2.waitKey(0)
-#cv2.destroyAllWindows()
+# Load the original image in grayscale
+image = cv2.imread('.\\data\\yes\\Y11.jpg', cv2.IMREAD_GRAYSCALE)
 
-def enhanceImage(img):
-    #convert image to unsigned 8 bit integer 0-255
-    img = Image.fromarray(np.uint8(img))
+# Convert grayscale image to color (BGR)
+image_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
-    #image enchance brighness and contrast to make diff elements in image more 'visible'
-    img = ImageEnhance.Brightness(img).enhance(random.uniform(0.9,1.2))
-    img = ImageEnhance.Contrast(img).enhance(random.uniform(0.9,1.2))
+# Create a binary mask
+_, mask = cv2.threshold(image, 160, 255, cv2.THRESH_BINARY)
+kernel = np.ones((5,5), np.uint8)
+mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-    #divide the array by 255 this creates all values between 0 and 1 allowing for a better model and more consistency
-    img = np.array(img)/255.0
-    return img
+# Create a colored overlay
+green_mask = cv2.cvtColor(mask_cleaned, cv2.COLOR_GRAY2BGR)
+green_mask[mask_cleaned == 255] = [0, 128, 0]  # Apply green color to the white parts of the mask
+
+# Combine the original image and the green mask with solid color
+highlighted_image = cv2.addWeighted(image_color, .5, green_mask, 1.0, 0)
+
+# Display the original and highlighted images
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+ax[0].imshow(cv2.cvtColor(image_color, cv2.COLOR_BGR2RGB))
+ax[0].set_title('Original Image')
+ax[0].axis('off')
+
+ax[1].imshow(cv2.cvtColor(highlighted_image, cv2.COLOR_BGR2RGB))
+ax[1].set_title('Tumor Segmented')
+ax[1].axis('off')
+
+plt.show()
