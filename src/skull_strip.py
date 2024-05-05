@@ -24,38 +24,41 @@ def ShowImage(title, img, ctype):
     plt.title(title)
     plt.show()
 
-img           = cv2.imread('.\\data\\yes\\Y21.jpg')
-gray          = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-#ShowImage('Yup', gray, 'gray')
+def stripSkull(img_path):
+    img = cv2.imread(img_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #ShowImage('Yup', gray, 'gray')
 
-ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
-#ShowImage('Applying Otsu',thresh,'gray')
+    ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
+    #ShowImage('Applying Otsu',thresh,'gray')
 
-colormask = np.zeros(img.shape, dtype=np.uint8)
-colormask[thresh!=0] = np.array((0,0,255))
-blended = cv2.addWeighted(img,0.7,colormask,0.1,0)
-#ShowImage('Blended', blended, 'bgr')
+    colormask = np.zeros(img.shape, dtype=np.uint8)
+    colormask[thresh!=0] = np.array((0,0,255))
+    blended = cv2.addWeighted(img,0.7,colormask,0.1,0)
+    #ShowImage('Blended', blended, 'bgr')
 
-ret, markers = cv2.connectedComponents(thresh)
+    ret, markers = cv2.connectedComponents(thresh)
 
-#Get the area taken by each component. Ignore label 0 since this is the background.
-marker_area = [np.sum(markers==m) for m in range(np.max(markers)) if m!=0]
-#Get label of largest component by area
-largest_component = np.argmax(marker_area)+1 #Add 1 since we dropped zero above
-#Get pixels which correspond to the brain
-brain_mask = markers==largest_component
+    #Get the area taken by each component. Ignore label 0 since this is the background.
+    marker_area = [np.sum(markers==m) for m in range(np.max(markers)) if m!=0]
+    #Get label of largest component by area
+    largest_component = np.argmax(marker_area)+1 #Add 1 since we dropped zero above
+    #Get pixels which correspond to the brain
+    brain_mask = markers==largest_component
 
-brain_out = img.copy()
-#In a copy of the original image, clear those pixels that don't correspond to the brain
-brain_out[brain_mask==False] = (0,0,0)
-ShowImage('Connected Components',brain_out,'rgb')
+    brain_out = img.copy()
+    #In a copy of the original image, clear those pixels that don't correspond to the brain
+    brain_out[brain_mask==False] = (0,0,0)
+    #ShowImage('Connected Components',brain_out,'rgb')
 
-brain_mask = np.uint8(brain_mask)
-kernel = np.ones((8,8),np.uint8)
-closing = cv2.morphologyEx(brain_mask, cv2.MORPH_CLOSE, kernel)
-#ShowImage('Closing', closing, 'gray')
+    brain_mask = np.uint8(brain_mask)
+    kernel = np.ones((8,8),np.uint8)
+    closing = cv2.morphologyEx(brain_mask, cv2.MORPH_CLOSE, kernel)
+    #ShowImage('Closing', closing, 'gray')
 
-brain_out = img.copy()
-#In a copy of the original image, clear those pixels that don't correspond to the brain
-brain_out[closing==False] = (0,0,0)
-ShowImage('Connected Components',brain_out,'rgb')
+    brain_out = img.copy()
+    #In a copy of the original image, clear those pixels that don't correspond to the brain
+    #ShowImage('Connected Components',brain_out,'rgb')
+    print(brain_out)
+    return brain_out
+
