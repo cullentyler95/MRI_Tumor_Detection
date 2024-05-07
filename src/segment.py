@@ -32,7 +32,7 @@ def apply_intensity_color_map(image):
     # Clean the mask using an opening operation
     mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-    # Apply a Jet color map to the original image
+    # Apply color map
     color_map = cv2.applyColorMap(image, cv2.COLORMAP_JET)
     # Mask the color map so only the high intensity areas are colored
     color_map_masked = cv2.bitwise_and(color_map, color_map, mask=mask_cleaned)

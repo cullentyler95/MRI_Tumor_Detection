@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-
 def ShowImage(title, img, ctype):
     plt.figure(figsize=(10, 10))
     if ctype == 'bgr':
@@ -34,7 +33,7 @@ def stripSkull(img_path):
     brain_out[~brain_mask] = (0, 0, 0)
     #ShowImage('Extracted Brain', brain_out, 'rgb')
 
-    # Optionally, you can show the brain mask
+
     brain_mask = np.uint8(brain_mask * 255)  # Convert mask to an image
     kernel = np.ones((8, 8), np.uint8)
     closing = cv2.morphologyEx(brain_mask, cv2.MORPH_CLOSE, kernel)
@@ -42,8 +41,7 @@ def stripSkull(img_path):
 
     return brain_out
 
-# Example usage
-    #ShowImage('Yup', gray, 'gray')
+
 
     ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)
     #ShowImage('Applying Otsu',thresh,'gray')
@@ -63,7 +61,7 @@ def stripSkull(img_path):
     brain_mask = markers==largest_component
 
     brain_out = img.copy()
-    #In a copy of the original image, clear those pixels that don't correspond to the brain
+    #Clear out skull
     brain_out[brain_mask==False] = (0,0,0)
     #ShowImage('Connected Components',brain_out,'rgb')
 
@@ -73,8 +71,6 @@ def stripSkull(img_path):
     #ShowImage('Closing', closing, 'gray')
 
     brain_out = img.copy()
-    #In a copy of the original image, clear those pixels that don't correspond to the brain
     #ShowImage('Connected Components',brain_out,'rgb')
-    print(brain_out)
     return brain_out
 

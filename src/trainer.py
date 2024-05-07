@@ -17,8 +17,8 @@ class Classifier(nn.Module):
             nn.Conv2d(64, 256, (3,3)),# Second convolution layer with increased depth
             nn.ReLU(),                # ReLU activation layer
             nn.Conv2d(256, 64, (3,3)),# Third convolution layer reducing depth
-            nn.ReLU(),                # ReLU activation layer
-            nn.Flatten(),             # Flatten the output for linear layers
+            nn.ReLU(),
+            nn.Flatten(),
             nn.Linear(64*(224-6)*(224-6), 64),  # Dense layer after flattening
             nn.Linear(64, 64),        # Additional dense layer with 64 units
             nn.Linear(64, 2)          # Final output layer with 2 units for classification
